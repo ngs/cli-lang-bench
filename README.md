@@ -24,11 +24,13 @@ the three programs agree on their output down to the byte.
 | `--version`, `--help` | Process startup only. No file I/O, no allocation beyond the runtime's own. |
 | `json <file>` | Parse a ~12 MB JSON array of 200,000 records, group by a field, aggregate. |
 | `walk <dir>` | Recursive directory traversal of ~4,000 files, counting files and bytes per extension. |
-| `hash <file>` | SHA-256 of a 64 MiB file. Streamed in 1 MiB chunks, so it is CPU and I/O together. |
-| `primes <n>` | Sieve of Eratosthenes up to 20,000,000. The only case with no I/O. |
+| `hash <file>` | SHA-256 of a 64 MiB file (32 MiB in CI). Streamed in 1 MiB chunks, so it is CPU and I/O together. |
+| `primes <n>` | Sieve of Eratosthenes up to 20,000,000 (10,000,000 in CI). The only case with no I/O. |
 
 Alongside the timings: **binary size**, **peak resident set size** per case, and
-**clean build time**.
+**clean build time**. The exact input sizes of a given run are recorded in the
+`workload.*` rows of the report's environment table, so a report always says
+what it measured.
 
 ## What is not measured
 

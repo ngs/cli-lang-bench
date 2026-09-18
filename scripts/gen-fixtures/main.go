@@ -22,7 +22,12 @@ var categories = []string{
 
 // extensions for the generated tree. ASCII only, so that sorting by bytes
 // (Rust, Go) and by UTF-16 code units (JavaScript) agree.
-var extensions = []string{"go", "json", "md", "rs", "ts", "txt"}
+//
+// Deliberately no ".go": the tree lives inside this module, and a directory of
+// files that end in .go but are not Go source makes `go vet ./...` and
+// `go build ./...` fail on generated data. The extensions only need to be
+// varied, not meaningful.
+var extensions = []string{"css", "html", "json", "md", "rs", "ts", "txt"}
 
 func main() {
 	var (

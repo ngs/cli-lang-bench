@@ -187,6 +187,8 @@ _env:
 	fi
 	@printf '  "runner": "%s",\n' "$${RUNNER_OS:-local}"
 	@printf '  "timestamp": "%s",\n' "$$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+	@printf '  "workload": {"records": "%s", "files": "%s", "blob_mib": "%s", "primes": "%s", "runs": "%s", "startup_runs": "%s"},\n' \
+	  "$(RECORDS)" "$(FILES)" "$(BLOB_MIB)" "$(PRIMES)" "$(RUNS)" "$(STARTUP_RUNS)"
 	@printf '  "versions": {\n'
 	@printf '    "rustc": "%s",\n' "$$(rustc --version)"
 	@printf '    "cargo": "%s",\n' "$$(cargo --version)"

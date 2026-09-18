@@ -41,6 +41,7 @@ type env struct {
 	Cores     string            `json:"cores"`
 	Timestamp string            `json:"timestamp"`
 	Runner    string            `json:"runner"`
+	Workload  map[string]string `json:"workload"`
 	Versions  map[string]string `json:"versions"`
 }
 
@@ -62,7 +63,7 @@ var caseLabels = map[string]string{
 	"help":    "`--help` (startup)",
 	"json":    "`json` (parse + aggregate)",
 	"walk":    "`walk` (directory traversal)",
-	"hash":    "`hash` (SHA-256, 64 MiB)",
+	"hash":    "`hash` (SHA-256 of the blob fixture)",
 	"primes":  "`primes` (CPU only)",
 }
 
@@ -95,6 +96,14 @@ func build(dir string) (string, error) {
 			row(&b, "Runner", e.Runner)
 		}
 		row(&b, "Measured at", e.Timestamp)
+		wkeys := make([]string, 0, len(e.Workload))
+		for k := range e.Workload {
+			wkeys = append(wkeys, k)
+		}
+		sort.Strings(wkeys)
+		for _, k := range wkeys {
+			row(&b, "workload."+k, e.Workload[k])
+		}
 		keys := make([]string, 0, len(e.Versions))
 		for k := range e.Versions {
 			keys = append(keys, k)
