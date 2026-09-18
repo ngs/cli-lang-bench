@@ -1,0 +1,12 @@
+{
+  "name": "bench-bun",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "description": "Bun + TypeScript implementation of the shared benchmark CLI",
+  "type": "module",
+  "module": "src/main.ts",
+  "scripts": {
+    "test": "bun test"
+  }
+}
