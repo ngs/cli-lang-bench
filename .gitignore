@@ -1,0 +1,11 @@
+# Build outputs
+/bin/
+rust/target/
+bun/node_modules/
+bun/bun.lock
+
+# Generated test data (regenerate with `make fixtures`)
+/fixtures/
+
+# Local benchmark results (CI publishes its own as artifacts)
+/results/

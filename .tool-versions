@@ -1,0 +1,5 @@
+# Pinned so local runs and CI measure the same compilers.
+# Keep this file and .github/workflows/bench.yml in sync.
+rust 1.98.1
+golang 1.26.4
+bun 1.4.2
