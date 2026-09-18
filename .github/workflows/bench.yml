@@ -1,0 +1,107 @@
+name: bench
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bench-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bench:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      # Third-party actions are pinned to a commit SHA rather than a moving tag.
+      # A tag can be repointed at new code after review; a SHA cannot. The
+      # comment after each SHA records which release it is, so upgrades stay
+      # readable in the diff.
+      - name: Check out the repository
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@a54c7afa936fefeb4456b2dd8068152669aa8203 # stable branch
+        with:
+          toolchain: "1.98.1"
+
+      - name: Install Go
+        uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed # v5.1.0
+        with:
+          go-version: "1.26.4"
+          cache: false
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2.0.1
+        with:
+          bun-version: "1.4.2"
+
+      - name: Install hyperfine (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y hyperfine
+
+      - name: Install hyperfine (macOS)
+        if: runner.os == 'macOS'
+        run: brew install hyperfine
+
+      - name: Report tool versions
+        run: |
+          set -euo pipefail
+          rustc --version
+          cargo --version
+          go version
+          bun --version
+          hyperfine --version
+
+      - name: Build
+        run: make build
+
+      - name: Verify that every implementation prints identical bytes
+        run: make verify
+
+      - name: Test
+        run: make test
+
+      # The runs are deliberately smaller than the local defaults. Shared
+      # runners are noisy, so more repetitions would buy precision the
+      # environment cannot deliver.
+      - name: Benchmark
+        run: make bench RECORDS=100000 FILES=2000 BLOB_MIB=32 PRIMES=10000000 RUNS=5 STARTUP_RUNS=20
+
+      - name: Report
+        run: make report
+
+      - name: Publish the report to the job summary
+        if: always()
+        run: |
+          set -euo pipefail
+          {
+            echo "> Measured on a shared GitHub-hosted runner (\`${{ matrix.os }}\`)."
+            echo "> Those machines are shared and their CPU model varies between runs, so"
+            echo "> treat small differences as noise. Run \`make bench report\` locally for"
+            echo "> numbers you can compare against each other."
+            echo
+            cat results/report.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the measurements
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: results-${{ matrix.os }}
+          path: results/
+          if-no-files-found: error
+          retention-days: 30
